@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 import json
 import os
-import system
+import watch_later
 
 
 token = str()
@@ -30,7 +30,7 @@ async def on_ready():
 
 @bot.command()
 async def 之後要看(ctx, name, link):
-    finale = system.add_watch_later(name, link)
+    finale = watch_later.add_watch_later(name, link)
     if finale:
         await ctx.send("新增成功")
     else:
@@ -39,7 +39,7 @@ async def 之後要看(ctx, name, link):
 
 @bot.command()
 async def 移除(ctx, name):
-    finale = system.remove_watch_later(name)
+    finale = watch_later.remove_watch_later(name)
     if finale:
         await ctx.send("移除成功")
     else:
@@ -48,7 +48,7 @@ async def 移除(ctx, name):
 
 @bot.command()
 async def 要看啥(ctx):
-    finale = system.get_watch_later()
+    finale = watch_later.get_watch_later()
     await ctx.send(finale)
 
 
