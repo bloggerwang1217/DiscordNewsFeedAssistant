@@ -3,7 +3,8 @@ import discord
 from discord.ext import commands
 import json
 import os
-import watch_later
+import system.watch_later as watch_later
+import system.youtube_community as yc
 
 
 token = str()
@@ -52,6 +53,31 @@ async def 要看啥(ctx):
     await ctx.send(finale)
 
 
+@bot.command()
+async def 追蹤頻道(ctx, link):
+    finale = yc.add_channel(link)
+    # if finale:
+    await ctx.send("新增成功")
+    # else:
+        # await ctx.send("新增失敗")
+
+
+@bot.command()
+async def 移除頻道(ctx, link):
+    finale = yc.remove_channel(link)
+    if finale:
+        await ctx.send("移除成功")
+    else:
+        await ctx.send("移除失敗")
+
+
+@bot.command()
+async def 看最新貼文(ctx):
+    finale = yc.get_latest()
+    await ctx.send(finale)
+
+
 #啟動機器人
 if __name__ == "__main__":
+    # yc.youtube_community_update()
     bot.run(token['token'])
