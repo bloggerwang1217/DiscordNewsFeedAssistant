@@ -52,8 +52,10 @@ async def 移除(ctx, name):
 
 @bot.command()
 async def 要看啥(ctx):
-    finale = watch_later.get_watch_later()
-    await ctx.send(finale)
+    finale_list = watch_later.get_watch_later()
+    for item in finale_list:
+        for text in item:
+            await ctx.send(text)
 
 
 @bot.command()

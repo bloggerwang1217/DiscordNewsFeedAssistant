@@ -41,9 +41,11 @@ def get_watch_later():
     text = []
     i = 1
     for key in watch_later_dict.keys():
-        text.append(f"{i}. {key}")
-        text.append(watch_later_dict[key])
-        text.append("----------")
+        temp_list = []
+        temp_list.append(f"{i}. {key}")
+        temp_list.append(watch_later_dict[key])
+        temp_list.append("----------")
+        text.append(temp_list)
         i += 1
 
-    return '\n'.join(text)
+    return text
