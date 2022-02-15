@@ -1,20 +1,23 @@
 #coding UTF-8
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
+import keep_alive
 import json
 import os
 import system.watch_later as watch_later
 import system.youtube_community as yc
 
 
+# 讀token
 token = str()
 with open('token.json','r') as t:
     token = json.load(t)
 
-#建立機器人
+
+# 建立機器人
 bot = commands.Bot(command_prefix = "!hey ")
 
-#機器人啟動時觸發
+# 機器人啟動時觸發
 @bot.event
 async def on_ready():
 
@@ -56,10 +59,10 @@ async def 要看啥(ctx):
 @bot.command()
 async def 追蹤頻道(ctx, link):
     finale = yc.add_channel(link)
-    # if finale:
-    await ctx.send("新增成功")
-    # else:
-        # await ctx.send("新增失敗")
+    if finale:
+        await ctx.send("新增成功")
+    else:
+        await ctx.send("新增失敗")
 
 
 @bot.command()
@@ -73,11 +76,27 @@ async def 移除頻道(ctx, link):
 
 @bot.command()
 async def 看最新貼文(ctx):
-    finale = yc.get_latest()
-    await ctx.send(finale)
+    finale_list = yc.get_latest()
+    for creator in finale_list:
+        for text in creator:
+            await ctx.send(text)
 
 
-#啟動機器人
+@tasks.loop(minutes=1)
+async def check_update():
+    await bot.wait_until_ready()
+    channel = bot.get_channel(943126423911145472)
+
+    finale_list = yc.check_latest()
+    if finale_list:
+        for creator in finale_list:
+            for text in creator:
+                await ctx.send(text)
+
+
+check_update.start()
+keep_alive.keep_alive()
+
+# 啟動機器人
 if __name__ == "__main__":
-    # yc.youtube_community_update()
     bot.run(token['token'])
