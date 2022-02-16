@@ -40,7 +40,7 @@ def remove_channel(link):
         return False
 
 
-def get_latest():
+def get_latest_post():
     youtube_update("save/followed_youtube_channels.json")
     youtube_channels = {}
 
@@ -54,9 +54,33 @@ def get_latest():
         temp_list = []
         
         temp_list.append((f"{i}. {youtube_channels[key]['latest_post_poster']}({youtube_channels[key]['latest_post_time']})"))
-        temp_list.append(youtube_channels[key]["latest_post_link"])
         temp_list.append(youtube_channels[key]["latest_post_text"])
         temp_list.append(youtube_channels[key]["latest_post_image"])
+        temp_list.append(youtube_channels[key]["latest_post_link"])
+        temp_list.append("----------")
+
+        text.append(temp_list)
+        i += 1
+
+    return text
+
+
+def get_latest_video():
+    youtube_update("save/followed_youtube_channels.json")
+    youtube_channels = {}
+
+    with open("save/followed_youtube_channels.json") as f:
+        youtube_channels = json.load(f)
+    
+    text = []
+    i = 1
+
+    for key in youtube_channels.keys():
+        temp_list = []
+        
+        temp_list.append((f"{i}. {youtube_channels[key]['latest_post_poster']}({youtube_channels[key]['latest_video_time']})"))
+        temp_list.append(youtube_channels[key]["latest_video_title"])
+        temp_list.append(youtube_channels[key]["latest_video_link"])
         temp_list.append("----------")
 
         text.append(temp_list)
@@ -66,13 +90,11 @@ def get_latest():
 
 
 def check_latest():
-    with open("save/new_post.json", 'w') as f:
-        f.write("{}")
-    youtube_update("save/new_post.json")
+    youtube_update("save/update_loader.json")
     new_youtube_channels = {}
     old_youtube_channels = {}
 
-    with open("save/new_post.json") as new_f:
+    with open("save/update_loader.json") as new_f:
         new_youtube_channels = json.load(new_f)
 
     with open("save/followed_youtube_channels.json") as old_f:
@@ -85,10 +107,18 @@ def check_latest():
         temp_list = []
         
         if new_youtube_channels[key]["latest_post_link"] != old_youtube_channels[key]["latest_post_link"]:
-            temp_list.append((f"{i}. {youtube_channels[key]['latest_post_poster']}({youtube_channels[key]['latest_post_time']})"))
-            temp_list.append(youtube_channels[key]["latest_post_link"])
-            temp_list.append(youtube_channels[key]["latest_post_text"])
-            temp_list.append(youtube_channels[key]["latest_post_image"])
+            temp_list.append((f"{i}. {new_youtube_channels[key]['latest_post_poster']}({new_youtube_channels[key]['latest_post_time']})"))
+            temp_list.append(new_youtube_channels[key]["latest_post_text"])
+            temp_list.append(new_youtube_channels[key]["latest_post_image"])
+            temp_list.append(new_youtube_channels[key]["latest_post_link"])
+            temp_list.append("----------")
+
+            text.append(temp_list)
+            i += 1
+        elif new_youtube_channels[key]["latest_video_link"] != old_youtube_channels[key]["latest_video_link"]:
+            temp_list.append((f"{i}. {youtube_channels[key]['latest_post_poster']}({youtube_channels[key]['latest_video_time']})"))
+            temp_list.append(youtube_channels[key]["latest_video_title"])
+            temp_list.append(youtube_channels[key]["latest_video_link"])
             temp_list.append("----------")
 
             text.append(temp_list)
@@ -102,41 +132,43 @@ def check_latest():
         return False
 
 
-def youtube_update(saving_to):
+def youtube_update(saving_to, update_file = "save/update_loader.json"):
     youtubers = {}
     with open(saving_to) as f:
         youtubers = json.load(f)
         for key in youtubers:
             community_url = youtubers[key]["community"]
-            # videos_url = youtubers[key]["videos"]
+            videos_url = youtubers[key]["videos"]
             community_r = requests.get(community_url)
-            # videos_r = requests.get(videos_url)
+            videos_r = requests.get(videos_url)
 
             community_soup = BeautifulSoup(community_r.text, 'html.parser')
-            # videos_soup = BeautifulSoup(community_r.text, 'html.parser')
+            videos_soup = BeautifulSoup(videos_r.text, 'html.parser')
             community_tags = community_soup.find_all("script")
-            # videos_tags = videos_soup.find_all("script")
+            videos_tags = videos_soup.find_all("script")
 
             community_text = []
             videos_text = []
             post_data = []
+            video_data = []
 
             for community_tag in community_tags:
                 community_text.append(community_tag.get_text().strip())
 
-            # for videos_tag in videos_tags:
-                # videos_text.append(videos_tag.get_text().strip())
+            for videos_tag in videos_tags:
+                videos_text.append(videos_tag.get_text().strip())
 
             with open("save/community_text.json", 'w') as f:
                 f.write(community_text[-7].strip(";var ytInitialData = "))
+
+            with open("save/videos_text.json", 'w') as f:
+                f.write(videos_text[-7].strip(";var ytInitialData = "))
 
             with open("save/community_text.json") as f:
                 data = json.load(f)
                 posts = data["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][3]["tabRenderer"]["content"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"]
 
                 for post in posts:
-                    # print(post, end="\n")
-                    # postid = post["backstagePostThreadRenderer"]["post"]["backstagePostRenderer"]["postId"]
                     try:
                         prefix = post["backstagePostThreadRenderer"]["post"]["backstagePostRenderer"]
                         postid = prefix["postId"]
@@ -155,31 +187,42 @@ def youtube_update(saving_to):
                     except:
                         pass
 
+            with open("save/videos_text.json") as f:
+                data = json.load(f)
+                videos = data["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][1]["tabRenderer"]["content"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"][0]["gridRenderer"]["items"]
+
+                try:
+                    for video in videos:
+                        prefix = video["gridVideoRenderer"]
+                        videoid = prefix["videoId"]
+                        title = prefix["title"]["runs"][0]["text"]
+                        image_link = prefix["thumbnail"]["thumbnails"][-1]["url"]
+                        publish_time = prefix["publishedTimeText"]["simpleText"]
+
+                        video_data_dict = {}
+                        video_data_dict["link"] = f"https://www.youtube.com/watch?v={videoid}"
+                        video_data_dict["title"] = title
+                        video_data_dict["time"] = publish_time
+                        video_data.append(video_data_dict)
+                except:
+                    pass
+
             youtubers[key]["latest_post_link"] = post_data[0]["link"]
             youtubers[key]["latest_post_poster"] = post_data[0]["poster"]
             youtubers[key]["latest_post_text"] = post_data[0]["text"]
             youtubers[key]["latest_post_image"] = post_data[0]["image"]
             youtubers[key]["latest_post_time"] = post_data[0]["time"]
 
+            youtubers[key]["latest_video_link"] = video_data[0]["link"]
+            youtubers[key]["latest_video_title"] = video_data[0]["title"]
+            youtubers[key]["latest_video_time"] = video_data[0]["time"]
+
             os.remove("save/community_text.json")
+            os.remove("save/videos_text.json")
 
 
     with open(saving_to, 'w') as f:
         json.dump(youtubers, f)
 
-
-# for i in department.keys():
-#     writer.writerow([department[i]])
-    
-#     for j in trans.keys():
-
-#         url = f"http://curri.aca.ntu.edu.tw/NTUVoxCourse/index.php/uquery/cou?DPRNDPT={i}+&QPYEAR=110&MSLGRD={j}"
-#         writer.writerow([trans[j]])
-#         r = requests.get(url)
-#         soup = BeautifulSoup(r.text, 'html.parser')
-#         class_tags = soup.find_all("td", {"width":"15%"})
-#         class_list = []
-#         for tag in class_tags:
-#             if tag.get_text().strip() != "課程中文名稱":
-#                 class_list.append(tag.get_text().strip())
-#         writer.writerow(class_list)
+    with open(update_file, 'w') as f:
+        json.dump(youtubers, f)

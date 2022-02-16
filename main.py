@@ -5,7 +5,7 @@ import keep_alive
 import json
 import os
 import system.watch_later as watch_later
-import system.youtube_community as yc
+import system.youtube as youtube
 
 
 # 讀token
@@ -60,7 +60,7 @@ async def 要看啥(ctx):
 
 @bot.command()
 async def 追蹤頻道(ctx, link):
-    finale = yc.add_channel(link)
+    finale = youtube.add_channel(link)
     if finale:
         await ctx.send("新增成功")
     else:
@@ -69,7 +69,7 @@ async def 追蹤頻道(ctx, link):
 
 @bot.command()
 async def 移除頻道(ctx, link):
-    finale = yc.remove_channel(link)
+    finale = youtube.remove_channel(link)
     if finale:
         await ctx.send("移除成功")
     else:
@@ -78,7 +78,15 @@ async def 移除頻道(ctx, link):
 
 @bot.command()
 async def 看最新貼文(ctx):
-    finale_list = yc.get_latest()
+    finale_list = youtube.get_latest_post()
+    for creator in finale_list:
+        for text in creator:
+            await ctx.send(text)
+
+
+@bot.command()
+async def 看最新影片(ctx):
+    finale_list = youtube.get_latest_video()
     for creator in finale_list:
         for text in creator:
             await ctx.send(text)
@@ -89,11 +97,11 @@ async def check_update():
     await bot.wait_until_ready()
     channel = bot.get_channel(943126423911145472)
 
-    finale_list = yc.check_latest()
+    finale_list = youtube.check_latest()
     if finale_list:
         for creator in finale_list:
             for text in creator:
-                await ctx.send(text)
+                await channel.send(text)
 
 
 check_update.start()
