@@ -1,11 +1,10 @@
 #coding UTF-8
-import discord
 from discord.ext import commands, tasks
 import keep_alive
 import json
-import os
 import system.watch_later as watch_later
 import system.youtube as youtube
+import system.twitch as twitch
 
 
 # 讀token
@@ -62,9 +61,9 @@ async def 要看啥(ctx):
 async def 追蹤頻道(ctx, link):
     finale = youtube.add_channel(link)
     if finale:
-        await ctx.send("新增成功")
+        await ctx.send("追蹤成功")
     else:
-        await ctx.send("新增失敗")
+        await ctx.send("追蹤失敗")
 
 
 @bot.command()
@@ -102,6 +101,30 @@ async def check_update():
         for creator in finale_list:
             for text in creator:
                 await channel.send(text)
+
+    finale_list = twitch.check_latest()
+    if finale_list:
+        for creator in finale_list:
+            for text in creator:
+                await channel.send(text)
+
+
+@bot.command()
+async def 追蹤直播(ctx, link):
+    finale = twitch.add_channel(link)
+    if finale:
+        await ctx.send("追蹤成功")
+    else:
+        await ctx.send("追蹤失敗")
+
+
+@bot.command()
+async def 退追直播(ctx, link):
+    finale = twitch.remove_channel(link)
+    if finale:
+        await ctx.send("退追成功")
+    else:
+        await ctx.send("退追失敗")
 
 
 check_update.start()

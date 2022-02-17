@@ -10,13 +10,27 @@ def add_channel(link):
         with open("save/followed_youtube_channels.json") as f:
             youtube_channels = json.load(f)
 
-        if link.split('/')[-1] not in youtube_channels:
-            youtube_channels[link.split('/')[-1]] = {}
-        youtube_channels[link.split('/')[-1]]["channel"] = link
-        youtube_channels[link.split('/')[-1]]["community"] = f"{link}/community"
-        youtube_channels[link.split('/')[-1]]["videos"] = f"{link}/videos"
+        name = link.split('/')[-1]
+
+        if name not in youtube_channels:
+            youtube_channels[name] = {}
+
+        youtube_channels[name]["channel"] = link
+        youtube_channels[name]["community"] = f"{link}/community"
+        youtube_channels[name]["videos"] = f"{link}/videos"
+        youtube_channels[name]["latest_post_link"] = ""
+        youtube_channels[name]["latest_post_poster"] = ""
+        youtube_channels[name]["latest_post_text"] = ""
+        youtube_channels[name]["latest_post_image"] = ""
+        youtube_channels[name]["latest_post_time"] = ""
+        youtube_channels[name]["latest_video_link"] = ""
+        youtube_channels[name]["latest_video_title"] = ""
+        youtube_channels[name]["latest_video_time"] = ""
 
         with open("save/followed_youtube_channels.json", 'w') as f:
+            json.dump(youtube_channels, f)
+
+        with open("save/youtube_update_loader.json", 'w') as f:
             json.dump(youtube_channels, f)
 
         return True
@@ -90,11 +104,11 @@ def get_latest_video():
 
 
 def check_latest():
-    youtube_update("save/update_loader.json")
+    youtube_update("save/youtube_update_loader.json")
     new_youtube_channels = {}
     old_youtube_channels = {}
 
-    with open("save/update_loader.json") as new_f:
+    with open("save/youtube_update_loader.json") as new_f:
         new_youtube_channels = json.load(new_f)
 
     with open("save/followed_youtube_channels.json") as old_f:
@@ -116,9 +130,9 @@ def check_latest():
             text.append(temp_list)
             i += 1
         elif new_youtube_channels[key]["latest_video_link"] != old_youtube_channels[key]["latest_video_link"]:
-            temp_list.append((f"{i}. {youtube_channels[key]['latest_post_poster']}({youtube_channels[key]['latest_video_time']})"))
-            temp_list.append(youtube_channels[key]["latest_video_title"])
-            temp_list.append(youtube_channels[key]["latest_video_link"])
+            temp_list.append((f"{i}. {new_youtube_channels[key]['latest_post_poster']}({new_youtube_channels[key]['latest_video_time']})"))
+            temp_list.append(new_youtube_channels[key]["latest_video_title"])
+            temp_list.append(new_youtube_channels[key]["latest_video_link"])
             temp_list.append("----------")
 
             text.append(temp_list)
@@ -132,7 +146,7 @@ def check_latest():
         return False
 
 
-def youtube_update(saving_to, update_file = "save/update_loader.json"):
+def youtube_update(saving_to, update_file = "save/youtube_update_loader.json"):
     youtubers = {}
     with open(saving_to) as f:
         youtubers = json.load(f)
