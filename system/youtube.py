@@ -191,8 +191,9 @@ def youtube_update(saving_to, update_file = "save/update_loader.json"):
                 data = json.load(f)
                 videos = data["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][1]["tabRenderer"]["content"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"][0]["gridRenderer"]["items"]
 
-                try:
-                    for video in videos:
+
+                for video in videos:
+                    try:
                         prefix = video["gridVideoRenderer"]
                         videoid = prefix["videoId"]
                         title = prefix["title"]["runs"][0]["text"]
@@ -204,8 +205,8 @@ def youtube_update(saving_to, update_file = "save/update_loader.json"):
                         video_data_dict["title"] = title
                         video_data_dict["time"] = publish_time
                         video_data.append(video_data_dict)
-                except:
-                    pass
+                    except:
+                        pass
 
             youtubers[key]["latest_post_link"] = post_data[0]["link"]
             youtubers[key]["latest_post_poster"] = post_data[0]["poster"]
