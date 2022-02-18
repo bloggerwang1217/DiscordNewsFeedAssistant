@@ -2,9 +2,11 @@
 from discord.ext import commands, tasks
 import keep_alive
 import json
+import os
 import system.watch_later as watch_later
 import system.youtube as youtube
 import system.twitch as twitch
+import sustem.email_grabber as email
 
 
 # 讀token
@@ -108,6 +110,10 @@ async def check_update():
             for text in creator:
                 await channel.send(text)
 
+    finale = email.check_latest()
+    if finale:
+        await channel.send(finale)
+
 
 @bot.command()
 async def 追蹤直播(ctx, link):
@@ -127,8 +133,13 @@ async def 退追直播(ctx, link):
         await ctx.send("退追失敗")
 
 
+@bot.command()
+async def 看最新信件(ctx):
+    finale = email.get_latest_email()
+    await ctx.send(finale)
+
 check_update.start()
-keep_alive.keep_alive()
+# keep_alive.keep_alive()
 
 # 啟動機器人
 if __name__ == "__main__":
