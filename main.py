@@ -95,47 +95,6 @@ async def 看最新影片(ctx):
         await ctx.send(text)
 
 
-@tasks.loop(minutes=1)
-async def check_update():
-    await bot.wait_until_ready()
-    channel = bot.get_channel(943126423911145472)
-    update_time = ["07:00", "10:00", "14:00", "16:00"]  # 換成格林威治時間
-    global switch    
-  
-    current_time = datetime.now().strftime("%H:%M")  
-
-    if current_time in update_time:
-        await channel.send(coin.get_eth_price())
-
-    finale_list = youtube.check_latest()
-    if finale_list:
-        for creator in finale_list:
-            if type(creator) == str:
-                await channel.send(creator)
-            else:
-                for text in creator:
-                    await channel.send(text)
-
-    if switch:   
-        finale_list = twitch.check_latest()
-        if finale_list:
-            for text in finale_list:
-                await channel.send(text)
-        switch = False
-    else:
-        switch = True
-
-    finale = email.check_latest()
-    if finale:
-        await channel.send(finale)
-
-    finale_list = rss.check_latest()
-    if finale_list:
-        for website in finale_list:
-            for line in website:
-                await channel.send(line)
-
-
 @bot.command()
 async def 追蹤直播(ctx, link):
     finale = twitch.add_channel(link)
@@ -175,8 +134,8 @@ async def 追蹤rss(ctx, name, link):
 
 
 @bot.command()
-async def 取消rss(ctx, name, link):
-    finale = rss.remove_rss(name, link)
+async def 取消rss(ctx, name):
+    finale = rss.remove_rss(name)
     if finale:
         await ctx.send("取消成功")
     else:
@@ -189,6 +148,47 @@ async def 用rss看(ctx, name, index):
 
     for line in finale_list:
         await ctx.send(line)
+
+
+@tasks.loop(minutes=1)
+async def check_update():
+    await bot.wait_until_ready()
+    channel = bot.get_channel(943126423911145472)
+    update_time = ["07:00", "10:00", "14:00", "16:00"]  # 換成格林威治時間
+    global switch    
+  
+    current_time = datetime.now().strftime("%H:%M")  
+
+    if current_time in update_time:
+        await channel.send(coin.get_eth_price())
+
+    finale_list = youtube.check_latest()
+    if finale_list:
+        for creator in finale_list:
+            if type(creator) == str:
+                await channel.send(creator)
+            else:
+                for text in creator:
+                    await channel.send(text)
+
+    if switch:   
+        finale_list = twitch.check_latest()
+        if finale_list:
+            for text in finale_list:
+                await channel.send(text)
+        switch = False
+    else:
+        switch = True
+
+    finale = email.check_latest()
+    if finale:
+        await channel.send(finale)
+
+    finale_list = rss.check_latest()
+    if finale_list:
+        for website in finale_list:
+            for line in website:
+                await channel.send(line)
 
 
 check_update.start()
