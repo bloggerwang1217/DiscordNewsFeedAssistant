@@ -12,8 +12,9 @@ def add_channel(link):
 
         if link.split('/')[-1] not in twitch_channels:
             twitch_channels[link.split('/')[-1]] = {}
-        twitch_channels[link.split('/')[-1]]["channel"] = link
+        twitch_channels[link.split('/')[-1]]["link"] = link
         twitch_channels[link.split('/')[-1]]["streaming_title"] = "No"
+        twitch_channels[link.split('/')[-1]]["last_status"] = ""
 
         with open("save/followed_twitch_channels.json", 'w') as f:
             json.dump(twitch_channels, f)
@@ -54,6 +55,7 @@ def check_latest():
         r_text = r.text.encode('ISO-8859-1').decode(requests.utils.get_encodings_from_content(r.text)[0])
         soup = BeautifulSoup(r_text, 'html.parser')
         tags = soup.find_all("script")
+        name_tags = soup.find_all("meta")
 
         data = '{"description":"No"}'
 
@@ -63,6 +65,16 @@ def check_latest():
                     data = tag.get_text().strip("[]")
             except:
                 pass
+
+        current_status = str()
+
+        for tag in name_tags:
+            try:
+                if tag.get("name") == "description":
+                    current_status = tag.get("content")
+            except:
+                pass
+
 
         with open("save/twitch_text.json", 'w') as f:
             f.write(data)
@@ -74,8 +86,9 @@ def check_latest():
 
         title = data["description"]
 
-        if streamers[key]["streaming_title"] != title:
+        if streamers[key]["streaming_title"] != title and streamers[key]["last_status"] != current_status:
             streamers[key]["streaming_title"] = title
+            streamers[key]["last_status"] = current_status
             if data["description"] != "No":
                 temp_list = []
                 temp_list.append(f"直播{i}. {key}")

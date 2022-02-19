@@ -3,10 +3,12 @@ from discord.ext import commands, tasks
 import keep_alive
 import json
 import os
+from datetime import datetime
 import system.watch_later as watch_later
 import system.youtube as youtube
 import system.twitch as twitch
-import sustem.email_grabber as email
+import system.email_grabber as email
+import system.eth_tracker as coin
 
 
 # 讀token
@@ -97,6 +99,8 @@ async def 看最新影片(ctx):
 async def check_update():
     await bot.wait_until_ready()
     channel = bot.get_channel(943126423911145472)
+    update_time = ["03:15"]  # 換成格林威治時間
+    current_time = datetime.now().strftime("%H:%M")
 
     finale_list = youtube.check_latest()
     if finale_list:
@@ -113,6 +117,9 @@ async def check_update():
     finale = email.check_latest()
     if finale:
         await channel.send(finale)
+
+    if current_time in update_time:
+        await channel.send(coin.get_eth_price())
 
 
 @bot.command()
@@ -137,6 +144,7 @@ async def 退追直播(ctx, link):
 async def 看最新信件(ctx):
     finale = email.get_latest_email()
     await ctx.send(finale)
+
 
 check_update.start()
 # keep_alive.keep_alive()
