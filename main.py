@@ -9,6 +9,7 @@ import system.youtube as youtube
 import system.twitch as twitch
 import system.email_grabber as email
 import system.eth_tracker as coin
+import system.rss_reader as rss
 
 
 # 讀token
@@ -90,36 +91,49 @@ async def 看最新貼文(ctx):
 @bot.command()
 async def 看最新影片(ctx):
     finale_list = youtube.get_latest_video()
-    for creator in finale_list:
-        for text in creator:
-            await ctx.send(text)
+    for text in finale_list:
+        await ctx.send(text)
 
 
 @tasks.loop(minutes=1)
 async def check_update():
     await bot.wait_until_ready()
     channel = bot.get_channel(943126423911145472)
-    update_time = ["03:15"]  # 換成格林威治時間
-    current_time = datetime.now().strftime("%H:%M")
+    update_time = ["07:00", "10:00", "14:00", "16:00"]  # 換成格林威治時間
+    global switch    
+  
+    current_time = datetime.now().strftime("%H:%M")  
+
+    if current_time in update_time:
+        await channel.send(coin.get_eth_price())
 
     finale_list = youtube.check_latest()
     if finale_list:
         for creator in finale_list:
-            for text in creator:
-                await channel.send(text)
+            if type(creator) == str:
+                await channel.send(creator)
+            else:
+                for text in creator:
+                    await channel.send(text)
 
-    finale_list = twitch.check_latest()
-    if finale_list:
-        for creator in finale_list:
-            for text in creator:
+    if switch:   
+        finale_list = twitch.check_latest()
+        if finale_list:
+            for text in finale_list:
                 await channel.send(text)
+        switch = False
+    else:
+        switch = True
 
     finale = email.check_latest()
     if finale:
         await channel.send(finale)
 
-    if current_time in update_time:
-        await channel.send(coin.get_eth_price())
+    finale_list = rss.check_latest()
+    if finale_list:
+        for website in finale_list:
+            for line in website:
+                await channel.send(line)
 
 
 @bot.command()
@@ -144,6 +158,37 @@ async def 退追直播(ctx, link):
 async def 看最新信件(ctx):
     finale = email.get_latest_email()
     await ctx.send(finale)
+
+
+@bot.command()
+async def 看以太幣(ctx):
+    await ctx.send(coin.get_eth_price())
+
+
+@bot.command()
+async def 追蹤rss(ctx, name, link):
+    finale = rss.add_rss(name, link)
+    if finale:
+        await ctx.send("追蹤成功")
+    else:
+        await ctx.send("追蹤失敗")
+
+
+@bot.command()
+async def 取消rss(ctx, name, link):
+    finale = rss.remove_rss(name, link)
+    if finale:
+        await ctx.send("取消成功")
+    else:
+        await ctx.send("取消失敗")
+
+
+@bot.command()
+async def 用rss看(ctx, name, index):
+    finale_list = rss.get_rss(name, int(index))
+
+    for line in finale_list:
+        await ctx.send(line)
 
 
 check_update.start()

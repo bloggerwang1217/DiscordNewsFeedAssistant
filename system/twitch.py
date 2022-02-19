@@ -44,7 +44,7 @@ def remove_channel(link):
 def check_latest():
     streamers = {}
     text = []
-    i = 1
+
     with open("save/followed_twitch_channels.json") as f:
         streamers = json.load(f)
 
@@ -91,13 +91,13 @@ def check_latest():
             streamers[key]["last_status"] = current_status
             if data["description"] != "No":
                 temp_list = []
-                temp_list.append(f"直播{i}. {key}")
+                temp_list.append(f"直播: {key}")
                 temp_list.append(title)
                 temp_list.append(streamers[key]["link"])
                 temp_list.append("----------")
 
-                text.append(temp_list)
-                i += 1
+                text.append('\n'.join(temp_list))
+
             with open("save/followed_twitch_channels.json", 'w') as f:
                 json.dump(streamers, f)
 

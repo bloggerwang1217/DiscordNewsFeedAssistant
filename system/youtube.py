@@ -62,19 +62,15 @@ def get_latest_post():
         youtube_channels = json.load(f)
     
     text = []
-    i = 1
 
     for key in youtube_channels.keys():
         temp_list = []
         
-        temp_list.append((f"{i}. {youtube_channels[key]['latest_post_poster']}({youtube_channels[key]['latest_post_time']})"))
-        temp_list.append(youtube_channels[key]["latest_post_text"])
+        temp_list.append(f"貼文: {youtube_channels[key]['latest_post_poster']}({youtube_channels[key]['latest_post_time']})\n{youtube_channels[key]['latest_post_text']}")
         temp_list.append(youtube_channels[key]["latest_post_image"])
-        temp_list.append(youtube_channels[key]["latest_post_link"])
-        temp_list.append("----------")
+        temp_list.append(youtube_channels[key]["latest_post_link"] + "\n----------")
 
         text.append(temp_list)
-        i += 1
 
     return text
 
@@ -87,18 +83,16 @@ def get_latest_video():
         youtube_channels = json.load(f)
     
     text = []
-    i = 1
 
     for key in youtube_channels.keys():
         temp_list = []
         
-        temp_list.append((f"{i}. {youtube_channels[key]['latest_post_poster']}({youtube_channels[key]['latest_video_time']})"))
+        temp_list.append((f"影片: {youtube_channels[key]['latest_post_poster']}({youtube_channels[key]['latest_video_time']})"))
         temp_list.append(youtube_channels[key]["latest_video_title"])
         temp_list.append(youtube_channels[key]["latest_video_link"])
         temp_list.append("----------")
 
-        text.append(temp_list)
-        i += 1
+        text.append('\n'.join(temp_list))
 
     return text
 
@@ -115,28 +109,24 @@ def check_latest():
         old_youtube_channels = json.load(old_f)
     
     text = []
-    i = 1
 
     for key in new_youtube_channels.keys():
         temp_list = []
         
         if new_youtube_channels[key]["latest_post_link"] != old_youtube_channels[key]["latest_post_link"]:
-            temp_list.append((f"{i}. {new_youtube_channels[key]['latest_post_poster']}({new_youtube_channels[key]['latest_post_time']})"))
-            temp_list.append(new_youtube_channels[key]["latest_post_text"])
+            temp_list.append(f"貼文: {new_youtube_channels[key]['latest_post_poster']}({new_youtube_channels[key]['latest_post_time']})\n{new_youtube_channels[key]['latest_post_text']}")
             temp_list.append(new_youtube_channels[key]["latest_post_image"])
-            temp_list.append(new_youtube_channels[key]["latest_post_link"])
-            temp_list.append("----------")
+            temp_list.append(new_youtube_channels[key]["latest_post_link"] + "\n----------")
 
             text.append(temp_list)
-            i += 1
+
         elif new_youtube_channels[key]["latest_video_link"] != old_youtube_channels[key]["latest_video_link"]:
-            temp_list.append((f"{i}. {new_youtube_channels[key]['latest_post_poster']}({new_youtube_channels[key]['latest_video_time']})"))
+            temp_list.append((f"影片: {new_youtube_channels[key]['latest_post_poster']}({new_youtube_channels[key]['latest_video_time']})"))
             temp_list.append(new_youtube_channels[key]["latest_video_title"])
             temp_list.append(new_youtube_channels[key]["latest_video_link"])
             temp_list.append("----------")
 
-            text.append(temp_list)
-            i += 1
+            text.append('\n'.join(temp_list))
 
     if len(text):
         with open("save/followed_youtube_channels.json", 'w') as f:
