@@ -49,6 +49,9 @@ def remove_channel(link):
         with open("save/followed_youtube_channels.json", 'w') as f:
             json.dump(youtube_channels, f)
 
+        with open("save/youtube_update_loader.json", 'w') as f:
+            json.dump(youtube_channels, f)
+
         return True
     except:
         return False
@@ -114,7 +117,10 @@ def check_latest():
         temp_list = []
         
         if new_youtube_channels[key]["latest_post_link"] != old_youtube_channels[key]["latest_post_link"]:
-            temp_list.append(f"貼文: {new_youtube_channels[key]['latest_post_poster']}({new_youtube_channels[key]['latest_post_time']})\n{new_youtube_channels[key]['latest_post_text']}")
+            temp_list.append(f"貼文: {new_youtube_channels[key]['latest_post_poster']}({new_youtube_channels[key]['latest_post_time']})")
+            for paragraph in new_youtube_channels[key]['latest_post_text']:
+                if paragraph != "":
+                    temp_list.append(paragraph)
             temp_list.append(new_youtube_channels[key]["latest_post_image"])
             temp_list.append(new_youtube_channels[key]["latest_post_link"] + "\n----------")
 
@@ -177,8 +183,11 @@ def youtube_update(saving_to, update_file = "save/youtube_update_loader.json"):
                         prefix = post["backstagePostThreadRenderer"]["post"]["backstagePostRenderer"]
                         postid = prefix["postId"]
                         author_text = prefix["authorText"]["runs"][0]["text"]
-                        content_text = prefix["contentText"]["runs"][0]["text"]
-                        image_link = prefix["backstageAttachment"]["backstageImageRenderer"]["image"]["thumbnails"][0]["url"]
+                        content_text = prefix["contentText"]["runs"][0]["text"].split("\n\n")
+                        try:
+                            image_link = prefix["backstageAttachment"]["backstageImageRenderer"]["image"]["thumbnails"][0]["url"]
+                        except:
+                            image_link = "無圖片"
                         publish_time = prefix["publishedTimeText"]["runs"][0]["text"]
 
                         post_data_dict = {}

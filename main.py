@@ -115,8 +115,13 @@ async def 退追直播(ctx, link):
 
 @bot.command()
 async def 看最新信件(ctx):
-    finale = email.get_latest_email()
-    await ctx.send(finale)
+    finale_list = email.get_latest_email()
+    for item in finale_list:
+        if type(item) == list:
+            for text in item:
+                await ctx.send(text)
+        else:
+            await ctx.send(item)
 
 
 @bot.command()
@@ -155,7 +160,6 @@ async def check_update():
     await bot.wait_until_ready()
     channel = bot.get_channel(943126423911145472)
     update_time = ["07:00", "10:00", "14:00", "16:00"]  # 換成格林威治時間
-    global switch    
   
     current_time = datetime.now().strftime("%H:%M")  
 
@@ -170,19 +174,20 @@ async def check_update():
             else:
                 for text in creator:
                     await channel.send(text)
+  
+    finale_list = twitch.check_latest()
+    if finale_list:
+        for text in finale_list:
+            await channel.send(text)
 
-    if switch:   
-        finale_list = twitch.check_latest()
-        if finale_list:
-            for text in finale_list:
-                await channel.send(text)
-        switch = False
-    else:
-        switch = True
-
-    finale = email.check_latest()
-    if finale:
-        await channel.send(finale)
+    finale_list = email.check_latest()
+    if finale_list:
+        for item in finale_list:
+            if type(item) == list:
+                for text in item:
+                    await channel.send(text)
+            else:
+                await channel.send(item)
 
     finale_list = rss.check_latest()
     if finale_list:
