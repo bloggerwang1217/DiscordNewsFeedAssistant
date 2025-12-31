@@ -4,8 +4,6 @@ from bs4 import BeautifulSoup
 import os
 
 
-offstream_check = 0
-
 def add_channel(link):
     twitch_channels = {}
     try:
@@ -17,6 +15,7 @@ def add_channel(link):
         twitch_channels[link.split('/')[-1]]["link"] = link
         twitch_channels[link.split('/')[-1]]["streaming_title"] = "No"
         twitch_channels[link.split('/')[-1]]["message_sent"] = 0
+        twitch_channels[link.split('/')[-1]]["offstream_check"] = 0
 
         with open("save/followed_twitch_channels.json", 'w') as f:
             json.dump(twitch_channels, f)
@@ -44,7 +43,6 @@ def remove_channel(link):
 
 
 def check_latest():
-    global offstream_check
     streamers = {}
     text = []
 
@@ -62,11 +60,8 @@ def check_latest():
         data = '{"description":"No", "publication":{"isLiveBroadcast": false}}'
 
         for tag in tags:
-            try:
-                if tag.get("type") == "application/ld+json":
-                    data = tag.get_text().strip("[]")
-            except:
-                pass
+            if tag.get("type") == "application/ld+json":
+                data = tag.get_text().strip("[]")
 
 
         with open("save/twitch_text.json", 'w') as f:
@@ -94,20 +89,18 @@ def check_latest():
 
                 text.append('\n'.join(temp_list))
 
-                with open("save/followed_twitch_channels.json", 'w') as f:
-                    json.dump(streamers, f)
             else:
-                offstream_check = 0
+                streamers[key]["offstream_check"] = 0
         else:
             if message_sent:
-                offstream_check += 1
-                if offstream_check == 5:
+                streamers[key]["offstream_check"] += 1
+                if streamers[key]["offstream_check"] == 5:
                     streamers[key]["streaming_title"] = "No"
                     streamers[key]["message_sent"] = 0
-                    offstream_check = 0
+                    streamers[key]["offstream_check"] = 0
 
-                    with open("save/followed_twitch_channels.json", 'w') as f:
-                        json.dump(streamers, f)
+    with open("save/followed_twitch_channels.json", 'w') as f:
+        json.dump(streamers, f)
 
     os.remove("save/twitch_text.json")
 
