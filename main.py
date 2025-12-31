@@ -4,6 +4,9 @@ import keep_alive
 import json
 import os
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 import system.watch_later as watch_later
 import system.youtube as youtube
 import system.twitch as twitch
