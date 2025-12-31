@@ -6,12 +6,9 @@ import json
 
 
 def get_latest_email():
-    # user_name = os.environ["USERNAME"]
-    # password = os.environ["PASSWORD"]
-    # pop3_server = os.environ["SERVER"]
-    user_name = "***REMOVED***"
-    password = "***REMOVED***"
-    pop3_server = "msa.ntu.edu.tw"
+    user_name = os.environ.get("EMAIL_USERNAME")
+    password = os.environ.get("EMAIL_PASSWORD")
+    pop3_server = os.environ.get("EMAIL_SERVER", "msa.ntu.edu.tw")
 
     server = poplib.POP3_SSL(pop3_server, 995)
 

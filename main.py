@@ -12,10 +12,8 @@ import system.eth_tracker as coin
 import system.rss_reader as rss
 
 
-# 讀token
-token = str()
-with open('token.json','r') as t:
-    token = json.load(t)
+# Read token from environment variable
+token = os.environ.get("DISCORD_TOKEN")
 
 
 # 建立機器人
@@ -201,4 +199,4 @@ check_update.start()
 
 # 啟動機器人
 if __name__ == "__main__":
-    bot.run(token['token'])
+    bot.run(token)
