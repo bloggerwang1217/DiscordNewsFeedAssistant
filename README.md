@@ -41,6 +41,10 @@ python main_lite.py
 
 ## Commands (main_lite.py)
 
+### Help
+
+- `!hey 說明` - Show all commands and examples
+
 ### Email
 
 - `!hey 看最新信件` - Get latest email
@@ -51,7 +55,7 @@ python main_lite.py
 - `!hey 取消rss <name>` - Unsubscribe
 - `!hey 用rss看 <name> <number>` - Read article (1 = latest)
 
-Auto-check runs every 15 minutes.
+**Auto-check:** Runs every 15 minutes to fetch new emails and RSS articles.
 
 ## Deploy to Server (e.g. Linode)
 

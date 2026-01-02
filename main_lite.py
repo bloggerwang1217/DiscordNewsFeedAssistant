@@ -41,6 +41,32 @@ async def on_ready():
         check_update.start()
 
 
+# ===== Help Command =====
+
+@bot.command()
+async def 說明(ctx):
+    """Show all available commands"""
+    help_text = """
+📚 **Discord News Feed Bot - 指令說明**
+
+**Email 相關**
+  • `!hey 看最新信件` - 查看最新的電子郵件
+
+**RSS Reader 相關**
+  • `!hey 追蹤rss <名稱> <連結>` - 訂閱 RSS 源
+  • `!hey 取消rss <名稱>` - 取消訂閱
+  • `!hey 用rss看 <名稱> <編號>` - 查看文章 (1=最新)
+
+**自動檢查**
+  每 15 分鐘自動檢查新的郵件和 RSS 文章並推送到頻道
+
+**範例**
+  `!hey 追蹤rss BloggerMandolin https://bloggermandolin.com/blog/rss.xml`
+  `!hey 用rss看 BloggerMandolin 1`
+    """
+    await safe_send(ctx, help_text)
+
+
 # ===== Email Commands =====
 
 @bot.command()
