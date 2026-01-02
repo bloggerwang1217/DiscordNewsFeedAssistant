@@ -17,6 +17,24 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!hey ", intents=intents)
 
 
+def init_save_files():
+    """Initialize save directory and required JSON files if they don't exist"""
+    import json
+
+    os.makedirs("save", exist_ok=True)
+
+    files = {
+        "latest_mail.json": {"sender": "", "receiver": "", "subject": ""},
+        "followed_rss.json": {}
+    }
+
+    for filename, default in files.items():
+        path = f"save/{filename}"
+        if not os.path.exists(path):
+            with open(path, 'w') as f:
+                json.dump(default, f)
+
+
 def split_message(text, limit=1900):
     """Split long message into chunks under Discord's limit"""
     if len(text) <= limit:
@@ -36,6 +54,7 @@ async def safe_send(target, text):
 
 @bot.event
 async def on_ready():
+    init_save_files()
     print(f">> Bot is ready << Logged in as {bot.user}")
     if not check_update.is_running():
         check_update.start()
