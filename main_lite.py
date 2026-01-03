@@ -77,7 +77,7 @@ async def 說明(ctx):
   • `!hey 用rss看 <名稱> <編號>` - 查看文章 (1=最新)
 
 **自動檢查**
-  每 15 分鐘自動檢查新的郵件和 RSS 文章並推送到頻道
+  每 1 分鐘自動檢查新的郵件和 RSS 文章並推送到頻道
 
 **範例**
   `!hey 追蹤rss BloggerMandolin https://bloggermandolin.com/blog/rss.xml`
@@ -132,7 +132,7 @@ async def 用rss看(ctx, name, index):
 
 # ===== Auto Check (every 1 minute) =====
 
-@tasks.loop(minutes=15)
+@tasks.loop(minutes=1)
 async def check_update():
     await bot.wait_until_ready()
     channel_id = os.environ.get("DISCORD_CHANNEL_ID")

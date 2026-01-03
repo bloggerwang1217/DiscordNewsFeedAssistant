@@ -55,7 +55,7 @@ python main_lite.py
 - `!hey 取消rss <name>` - Unsubscribe
 - `!hey 用rss看 <name> <number>` - Read article (1 = latest)
 
-**Auto-check:** Runs every 15 minutes to fetch new emails and RSS articles.
+**Auto-check:** Runs every 1 minute to fetch new emails and RSS articles.
 
 ## Deploy to Server (e.g. Linode)
 
