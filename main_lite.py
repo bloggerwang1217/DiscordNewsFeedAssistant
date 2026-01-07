@@ -24,7 +24,7 @@ def init_save_files():
     os.makedirs("save", exist_ok=True)
 
     files = {
-        "latest_mail.json": {"sender": "", "receiver": "", "subject": ""},
+        "latest_mail.json": {"last_count": 0},
         "followed_rss.json": {}
     }
 
