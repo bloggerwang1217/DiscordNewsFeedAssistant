@@ -3,6 +3,7 @@ import os
 from email.parser import BytesParser, Parser
 from email.policy import default
 import json
+from bs4 import BeautifulSoup
 
 
 def get_latest_email():
@@ -38,18 +39,42 @@ def get_latest_email():
         text.append("無標題")
 
     content_list = []
+    content_added = False
     for part in parsed_data.walk():
-
         # 如果maintype是multipart，說明是容器（包含正文、附件等）
         if part.get_content_maintype() == 'multipart':
             continue
         elif part.get_content_maintype() == 'text':
-            content_list.append("正文:")
+            content = part.get_content()
+            content_type = part.get_content_type()
 
-            for item in part.get_content().split("\r\n\r\n\r\n"):
-                if len(item.strip()) != 0:
-                    content_list.append(item.strip())
+            # If HTML, parse with BeautifulSoup
+            if content_type == 'text/html':
+                soup = BeautifulSoup(content, 'html.parser')
+                # Remove script and style tags
+                for script in soup(["script", "style"]):
+                    script.decompose()
+                content = soup.get_text()
+
+            # Clean up content: replace multiple line breaks
+            content = content.replace('\r\n\r\n\r\n', '\n\n')
+            content = content.replace('\r\n', '\n')
+            # Remove excessive blank lines
+            lines = [line for line in content.split('\n') if line.strip()]
+            content = '\n'.join(lines)
+
+            # Limit length to avoid flooding (first 1500 chars)
+            if len(content) > 1500:
+                content = content[:1500] + "\n...(內容過長，已截斷)"
+
+            if content.strip():
+                content_list.append("正文:")
+                content_list.append(content.strip())
+                content_added = True
             break
+
+    if not content_added:
+        content_list.append("正文: (無內容或無法解析)")
 
     text.append(content_list)
 
@@ -108,15 +133,41 @@ def check_latest():
                 text.append("無標題")
 
             content_list = []
+            content_added = False
             for part in parsed_data.walk():
                 if part.get_content_maintype() == 'multipart':
                     continue
                 elif part.get_content_maintype() == 'text':
-                    content_list.append("正文:")
-                    for item in part.get_content().split("\r\n\r\n\r\n"):
-                        if len(item.strip()) != 0:
-                            content_list.append(item.strip())
+                    content = part.get_content()
+                    content_type = part.get_content_type()
+
+                    # If HTML, parse with BeautifulSoup
+                    if content_type == 'text/html':
+                        soup = BeautifulSoup(content, 'html.parser')
+                        # Remove script and style tags
+                        for script in soup(["script", "style"]):
+                            script.decompose()
+                        content = soup.get_text()
+
+                    # Clean up content: replace multiple line breaks
+                    content = content.replace('\r\n\r\n\r\n', '\n\n')
+                    content = content.replace('\r\n', '\n')
+                    # Remove excessive blank lines
+                    lines = [line for line in content.split('\n') if line.strip()]
+                    content = '\n'.join(lines)
+
+                    # Limit length to avoid flooding (first 1500 chars)
+                    if len(content) > 1500:
+                        content = content[:1500] + "\n...(內容過長，已截斷)"
+
+                    if content.strip():
+                        content_list.append("正文:")
+                        content_list.append(content.strip())
+                        content_added = True
                     break
+
+            if not content_added:
+                content_list.append("正文: (無內容或無法解析)")
 
             text.append(content_list)
             new_emails.append(text)
