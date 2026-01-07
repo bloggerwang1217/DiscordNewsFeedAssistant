@@ -79,6 +79,9 @@ def check_latest():
 
     for key in followed_dict.keys():
         NewsFeed = feedparser.parse(followed_dict[key]["link"])
+        # If no last_check_time, initialize to current time (don't push old articles)
+        if "last_check_time" not in followed_dict[key]:
+            followed_dict[key]["last_check_time"] = current_time
         last_check_time = followed_dict[key].get("last_check_time", 0)
 
         # Check up to 10 recent entries
