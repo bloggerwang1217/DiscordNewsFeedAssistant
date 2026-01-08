@@ -28,13 +28,14 @@ def get_latest_email():
     text = []
 
     text.append("發件人: " + parsed_data["from"])
-    try:
-        text.append("收件人: " + parsed_data["to"])
-    except:
-        text.append("收件人: 未顯示")
 
+    # Get subject and clean up email address in parentheses
     try:
-        text.append("標題: " + parsed_data["subject"])
+        subject = parsed_data["subject"]
+        # Remove email address in parentheses at the end
+        if subject.endswith(")"):
+            subject = subject[:subject.rfind("(")].strip()
+        text.append("標題: 「" + subject + "」")
     except:
         text.append("無標題")
 
@@ -59,9 +60,27 @@ def get_latest_email():
             # Clean up content: replace multiple line breaks
             content = content.replace('\r\n\r\n\r\n', '\n\n')
             content = content.replace('\r\n', '\n')
-            # Remove excessive blank lines
-            lines = [line for line in content.split('\n') if line.strip()]
-            content = '\n'.join(lines)
+
+            # Remove email addresses and spam patterns
+            lines = content.split('\n')
+            cleaned_lines = []
+            for line in lines:
+                # Skip lines that are just email addresses
+                if '@' in line and len(line.replace('@', '').replace('.', '')) < 30:
+                    continue
+                # Skip lines with "邀請對象" section or attendee lists
+                if any(skip_text in line for skip_text in ['邀請對象', '查看所有', '回覆', '由於你是', '轉寄', '來自 Google']):
+                    continue
+                # Skip very long URLs
+                if 'https://' in line and len(line) > 100:
+                    continue
+                cleaned_lines.append(line)
+
+            # Keep structure: preserve 1-2 blank lines for readability
+            content = '\n'.join(cleaned_lines)
+            # Remove excessive blank lines (3+) but keep 1-2 for paragraph breaks
+            while '\n\n\n' in content:
+                content = content.replace('\n\n\n', '\n\n')
 
             # Limit length to avoid flooding (first 1500 chars)
             if len(content) > 1500:
@@ -122,13 +141,13 @@ def check_latest():
             text.append("**新信件**")
             text.append("發件人: " + parsed_data["from"])
 
+            # Get subject and clean up email address in parentheses
             try:
-                text.append("收件人: " + parsed_data["to"])
-            except:
-                text.append("收件人: 未顯示")
-
-            try:
-                text.append("標題: " + parsed_data["subject"])
+                subject = parsed_data["subject"]
+                # Remove email address in parentheses at the end
+                if subject.endswith(")"):
+                    subject = subject[:subject.rfind("(")].strip()
+                text.append("標題: 「" + subject + "」")
             except:
                 text.append("無標題")
 
@@ -152,9 +171,27 @@ def check_latest():
                     # Clean up content: replace multiple line breaks
                     content = content.replace('\r\n\r\n\r\n', '\n\n')
                     content = content.replace('\r\n', '\n')
-                    # Remove excessive blank lines
-                    lines = [line for line in content.split('\n') if line.strip()]
-                    content = '\n'.join(lines)
+
+                    # Remove email addresses (common spam pattern)
+                    lines = content.split('\n')
+                    cleaned_lines = []
+                    for line in lines:
+                        # Skip lines that are just email addresses
+                        if '@' in line and len(line.replace('@', '').replace('.', '')) < 30:
+                            continue
+                        # Skip lines with "邀請對象" section or attendee lists
+                        if any(skip_text in line for skip_text in ['邀請對象', '查看所有', '回覆', '由於你是', '轉寄', '來自 Google']):
+                            continue
+                        # Skip very long URLs
+                        if 'https://' in line and len(line) > 100:
+                            continue
+                        cleaned_lines.append(line)
+
+                    # Keep structure: preserve 1-2 blank lines for readability
+                    content = '\n'.join(cleaned_lines)
+                    # Remove excessive blank lines (3+) but keep 1-2 for paragraph breaks
+                    while '\n\n\n' in content:
+                        content = content.replace('\n\n\n', '\n\n')
 
                     # Limit length to avoid flooding (first 1500 chars)
                     if len(content) > 1500:
