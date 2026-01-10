@@ -87,15 +87,14 @@ def get_latest_email():
                 content = content[:1500] + "\n...(內容過長，已截斷)"
 
             if content.strip():
-                content_list.append("正文:")
-                content_list.append(content.strip())
+                content_list.append("正文:\n" + content.strip())
                 content_added = True
             break
 
     if not content_added:
         content_list.append("正文: (無內容或無法解析)")
 
-    text.append(content_list)
+    text.extend(content_list)
 
     server.quit()
 
@@ -198,15 +197,14 @@ def check_latest():
                         content = content[:1500] + "\n...(內容過長，已截斷)"
 
                     if content.strip():
-                        content_list.append("正文:")
-                        content_list.append(content.strip())
+                        content_list.append("正文:\n" + content.strip())
                         content_added = True
                     break
 
             if not content_added:
                 content_list.append("正文: (無內容或無法解析)")
 
-            text.append(content_list)
+            text.extend(content_list)
             new_emails.append(text)
 
         # Update last count
